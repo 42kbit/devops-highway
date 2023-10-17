@@ -34,7 +34,21 @@ resource "aws_instance" "secured_ec2" {
     source = "./file.txt"
     destination = "/home/${local.aws_login_user}/file.txt"
   }
+  
+  provisioner "local-exec" {
+    command = "echo HELLO LOCAL WORLD!"
+  }
+  
+  provisioner "remote-exec" {
+    inline = [ "echo HELLO REMOTE WORLD! > remote_world.txt" ]
+  }
 }
+ 
+output "ec2_public_ip" {
+  value = [for i in aws_instance.secured_ec2: "${i.public_ip}"]
+  sensitive = true
+}
+
 
 resource "aws_key_pair" "ssh_key" {
   key_name = "ssh_key"
