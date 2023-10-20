@@ -45,6 +45,18 @@ data "aws_instances" "ec2_named_instances" {
     name = "tag:Name"
     values = ["EC2 Instance"]
   }
+  
+  # should wait for its creation
+  depends_on = [ aws_instance.secured_ec2 ]
+}
+
+# data sources can do all sorts of stuff, this one zips file
+data "archive_file" "zip_file_txt" {
+  type = "zip"
+  # can only zip directories otherwise:
+  # error: could not archive directory that is a file: ./file.txt
+  source_dir = "${path.module}/file-dir"
+  output_path = "${path.module}/file-dir.zip"
 }
 
 data "aws_instances" "ec2_with_ssh_keys" {
@@ -53,6 +65,9 @@ data "aws_instances" "ec2_with_ssh_keys" {
     name = "key-name"
     values = ["ssh_key"]
   }
+
+  # should wait for its creation
+  depends_on = [ aws_instance.secured_ec2 ]
 }
  
  
