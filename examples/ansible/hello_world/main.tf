@@ -59,12 +59,14 @@ resource "aws_security_group" "hello_world" {
 
 resource "null_resource" "configure_ansible" {
   triggers = {
-    # hwi_id = aws_instance.hello_world.id
+    # run only after hwi_id is set
+    hwi_id = aws_instance.hello_world.id
+    # run everytime
     run_everytime = timestamp()
   }
 
   provisioner "local-exec" {
-    command = <<EOT
+    command = <<-EOT
       ANSIBLE_HOST_KEY_CHECKING=False \
       ansible all --key-file ${var.ansible_pri_key_path} \
       -i ${local_file.ansible_inventory.filename} \
