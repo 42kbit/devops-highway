@@ -38,6 +38,9 @@ resource "aws_key_pair" "hello_world" {
 resource "aws_security_group" "hello_world" {
   name        = "hello_world_allow_ssh"
   description = "Allows ssh for ansible"
+  lifecycle {
+    create_before_destroy = true
+  }
 
   ingress {
     description      = "ssh from vpc"
