@@ -59,10 +59,21 @@ resource "aws_security_group" "hello_world" {
 
 resource "null_resource" "configure_ansible" {
   triggers = {
-    # run only after hwi_id is set
-    hwi_id = aws_instance.hello_world.id
     # run everytime
     run_everytime = timestamp()
+  }
+
+  # this shit will ensure that connection can be established
+  # before starting ansible. More:
+  # https://stackoverflow.com/questions/62403030/terraform-wait-till-the-instance-is-reachable
+  provisioner "remote-exec" {
+    connection {
+      host = aws_instance.hello_world.public_ip
+      user = "ec2-user"
+      private_key = file(var.ansible_pri_key_path)
+    }
+
+    inline = [ "echo Connection can be established, starting ansible..." ]
   }
 
   provisioner "local-exec" {
