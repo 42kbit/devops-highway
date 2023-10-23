@@ -4,14 +4,11 @@
   hosts: all # ansible all
   become: true # --become
   tasks:
-    - name: Update yum cache
-      ansible.builtin.yum:
-        update_cache: true
-    - name: Install apache2 package # yum install httpd
-      ansible.builtin.yum:
-        name: httpd
-        state: installed
-    - name: Reload systemctl
-      ansible.builtin.systemd: # systemctl reload httpd
-        name: httpd
-        state: reloaded
+    - name: Install apache package
+      ansible.builtin.package:
+        name: "{{ apache_package }}"
+        state: latest
+    - name: Start apache daemon
+      ansible.builtin.systemd:
+        name: "{{ apache_package }}"
+        state: started

@@ -1,3 +1,15 @@
+
+variable "ansible_pub_key_path" {}
+variable "ansible_pri_key_path" {}
+variable "instances_info" {
+  type = list(object({
+    user = string
+    ami = string
+    args = list(string)
+  }))
+}
+variable "region" {}
+
 terraform {
   required_providers {
     aws = {
@@ -8,16 +20,12 @@ terraform {
 }
 
 provider "aws" {
-  region = "eu-north-1"
+  region = var.region
 }
 
-variable "ansible_pub_key_path" {}
-variable "ansible_pri_key_path" {}
-variable "instance_count" {}
-
 resource "aws_instance" "hello_world" {
-  count = var.instance_count
-  ami = "ami-0ea7dc624e77a15d5"
+  count = length(var.instances_info)
+  ami = var.instances_info[count.index].ami
   instance_type = "t3.micro"
   key_name = aws_key_pair.hello_world.key_name
   vpc_security_group_ids = [aws_security_group.hello_world.id]
@@ -28,7 +36,11 @@ resource "aws_instance" "hello_world" {
 resource "local_file" "ansible_inventory" {
   filename = "${path.module}/inventory"
   content = templatefile("${path.module}/inventory.tpl", {
-    public_ips = aws_instance.hello_world[*].public_ip
+    # todo add concat here
+    cons = [for idx, i in var.instances_info : {
+      ip = aws_instance.hello_world[idx].public_ip
+      args = i.args
+    }]
   })
 }
 
@@ -62,8 +74,6 @@ resource "aws_security_group" "hello_world" {
     ipv6_cidr_blocks = ["::/0"]
   }
 
-
-
   egress {
     from_port        = 0
     to_port          = 0
@@ -74,20 +84,36 @@ resource "aws_security_group" "hello_world" {
 }
 
 resource "null_resource" "configure_ansible" {
-  count = var.instance_count
-
+  #  count = length(var.instances_info)
+  # servers are already in inventory
   triggers = {
     # run everytime
     run_everytime = timestamp()
+    inventory_generated = local_file.ansible_inventory.content_sha1
   }
 
   # this shit will ensure that connection can be established
   # before starting ansible. More:
   # https://stackoverflow.com/questions/62403030/terraform-wait-till-the-instance-is-reachable
+  
+  # TODO: make those not shit (ctrl-c ctrl-v)
+  #       and runned in paralel
   provisioner "remote-exec" {
+
     connection {
-      host = aws_instance.hello_world[count.index].public_ip
-      user = "ec2-user"
+      host = aws_instance.hello_world[0].public_ip
+      user = var.instances_info[0].user
+      private_key = file(var.ansible_pri_key_path)
+    }
+
+    inline = [ "echo Connection can be established, starting ansible..." ]
+  }
+
+  provisioner "remote-exec" {
+
+    connection {
+      host = aws_instance.hello_world[1].public_ip
+      user = var.instances_info[1].user
       private_key = file(var.ansible_pri_key_path)
     }
 
@@ -99,11 +125,11 @@ resource "null_resource" "configure_ansible" {
       ANSIBLE_HOST_KEY_CHECKING=False \
       ansible all --key-file ${var.ansible_pri_key_path} \
       -i ${local_file.ansible_inventory.filename} \
-      -m ping --user ec2-user;
+      -m ping;
 
       ansible-playbook --key-file ${var.ansible_pri_key_path} \
       -i ${local_file.ansible_inventory.filename} \
-      --user ec2-user apache_init.yml
+      apache_init.yml
     EOT
   }
 }
