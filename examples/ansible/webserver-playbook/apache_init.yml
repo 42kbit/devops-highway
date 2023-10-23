@@ -1,7 +1,8 @@
 ---
 
 - name: Apache init
-  hosts: all # ansible all
+  hosts:
+    - apache_webserver # ansible all
   become: true # --become
   tasks:
     - name: Install apache package
