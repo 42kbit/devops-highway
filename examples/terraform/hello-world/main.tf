@@ -17,8 +17,8 @@ terraform {
     # which should be preconfigured, with IAM public and private keys
     # via "aws configure"
     aws = {
-        source  = "hashicorp/aws"
-        version = "~> 3.0"
+      source  = "hashicorp/aws"
+      version = "~> 3.0"
     }
   }
 }
@@ -34,9 +34,9 @@ provider "aws" {
 #   this case - ec2 instance.
 # "example-name" string, is a tag, that specifies name (doesn't matter for now)
 resource "aws_instance" "example-name" {
-    ami = "ami-0ea7dc624e77a15d5" # image of virtual machine, in this case
-                                  # Amazon Linux image (x86)
-    instance_type = "t3.micro"    # this one, cuz it is free. (Oct. 2023)
+  ami = "ami-0ea7dc624e77a15d5" # image of virtual machine, in this case
+  # Amazon Linux image (x86)
+  instance_type = "t3.micro" # this one, cuz it is free. (Oct. 2023)
 }
 
 # Ok done, 20 lines or so without comments, lets run this baddie:

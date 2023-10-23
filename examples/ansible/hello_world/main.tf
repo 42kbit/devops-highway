@@ -1,7 +1,7 @@
 terraform {
   required_providers {
     aws = {
-      source = "hashicorp/aws"
+      source  = "hashicorp/aws"
       version = "~> 3.0"
     }
   }
@@ -15,9 +15,9 @@ variable "ansible_pub_key_path" {}
 variable "ansible_pri_key_path" {}
 
 resource "aws_instance" "hello_world" {
-  ami = "ami-0ea7dc624e77a15d5"
-  instance_type = "t3.micro"
-  key_name = aws_key_pair.hello_world.key_name
+  ami                    = "ami-0ea7dc624e77a15d5"
+  instance_type          = "t3.micro"
+  key_name               = aws_key_pair.hello_world.key_name
   vpc_security_group_ids = [aws_security_group.hello_world.id]
 
   depends_on = [aws_security_group.hello_world, aws_key_pair.hello_world]
@@ -31,7 +31,7 @@ resource "local_file" "ansible_inventory" {
 }
 
 resource "aws_key_pair" "hello_world" {
-  key_name = "ansible_pub_key"
+  key_name   = "ansible_pub_key"
   public_key = file(var.ansible_pub_key_path)
 }
 
@@ -47,7 +47,7 @@ resource "aws_security_group" "hello_world" {
     from_port        = 22
     to_port          = 22
     protocol         = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
+    cidr_blocks      = ["0.0.0.0/0"]
     ipv6_cidr_blocks = ["::/0"]
   }
 
@@ -71,12 +71,12 @@ resource "null_resource" "configure_ansible" {
   # https://stackoverflow.com/questions/62403030/terraform-wait-till-the-instance-is-reachable
   provisioner "remote-exec" {
     connection {
-      host = aws_instance.hello_world.public_ip
-      user = "ec2-user"
+      host        = aws_instance.hello_world.public_ip
+      user        = "ec2-user"
       private_key = file(var.ansible_pri_key_path)
     }
 
-    inline = [ "echo Connection can be established, starting ansible..." ]
+    inline = ["echo Connection can be established, starting ansible..."]
   }
 
   provisioner "local-exec" {

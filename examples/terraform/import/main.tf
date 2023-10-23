@@ -1,8 +1,8 @@
 terraform {
   required_providers {
     aws = {
-        source  = "hashicorp/aws"
-        version = "~> 3.0"
+      source  = "hashicorp/aws"
+      version = "~> 3.0"
     }
   }
 }
@@ -18,9 +18,9 @@ provider "aws" {
 # amazon linux, as we setup here.
 resource "aws_instance" "example_name" {
   # ami = "ami-0fe8bec493a81c7da" # ubuntu
-  ami = "ami-0d2ca4d7e5645e504" # amazon linux
+  ami           = "ami-0d2ca4d7e5645e504" # amazon linux
   instance_type = "t3.micro"
-  
+
   tags = {
     Name = "my-test-instance"
   }

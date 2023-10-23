@@ -1,7 +1,7 @@
 terraform {
   required_providers {
     aws = {
-      source = "hashicorp/aws"
+      source  = "hashicorp/aws"
       version = "~> 3.0"
     }
   }
@@ -9,37 +9,37 @@ terraform {
 
 variable "region" {
   description = "AWS Region"
-  type = string
-  default = "eu-north-1"
+  type        = string
+  default     = "eu-north-1"
 }
 
 variable "ami" {
   description = "AWS AMI"
-  type = string
-  default = "ami-0ea7dc624e77a15d5"
+  type        = string
+  default     = "ami-0ea7dc624e77a15d5"
 }
 
 variable "instance_type" {
   description = "AWS Instance type"
-  type = string
-  default = "t3.micro"
+  type        = string
+  default     = "t3.micro"
 }
 
 variable "instance_count" {
   description = "Number of instances to create"
-  type = number
-  default = 1
+  type        = number
+  default     = 1
 }
 
 variable "user_names" {
   description = "IAM Users"
-  type = list(string)
-  default = [ "user1", "user2", "user3" ]
+  type        = list(string)
+  default     = ["user1", "user2", "user3"]
 }
 
 variable "funny_tag" {
   description = "Defines funny tag"
-  type = map(string) # map is a key value, in this case: key maps to string
+  type        = map(string) # map is a key value, in this case: key maps to string
   default = {
     "funnys" = "YES"
   }
@@ -64,10 +64,10 @@ provider "aws" {
 # https://developer.hashicorp.com/terraform/language/meta-arguments/count
 
 resource "aws_instance" "hello_variables" {
-  ami = var.ami # Amazon Linux image (x86)
-  instance_type = var.instance_type 
+  ami           = var.ami # Amazon Linux image (x86)
+  instance_type = var.instance_type
   # tag is a map of strings
-  tags = var.funny_tag
+  tags  = var.funny_tag
   count = var.instance_count # run this resource code "var.instance_count" times.
 }
 
@@ -76,8 +76,8 @@ resource "aws_instance" "hello_variables" {
 
 resource "aws_iam_user" "iam_users" {
   count = length(var.user_names)
-  name = var.user_names[count.index]
-  
+  name  = var.user_names[count.index]
+
   tags = {
     Number = "User${count.index + 1}"
   }

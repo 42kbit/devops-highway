@@ -4,7 +4,7 @@ data "template_file" "policy" {
   template = file("${path.module}/file.tpl")
 
   vars = {
-    name = "deb" 
+    name = "deb"
   }
 }
 
