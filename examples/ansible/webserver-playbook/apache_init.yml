@@ -10,6 +10,14 @@
         name: "{{ apache_package }}"
         state: latest
     - name: Start apache daemon
-      ansible.builtin.systemd:
+      ansible.builtin.service:
         name: "{{ apache_package }}"
         state: started
+        enabled: true # start on boot
+    - name: Copy default html placeholder
+      ansible.builtin.copy:
+        src: ./webpages/placeholder.html
+        dest: /var/www/html/index.html
+        owner: root # requires sudo i guess
+        group: root
+        mode: "0644"
