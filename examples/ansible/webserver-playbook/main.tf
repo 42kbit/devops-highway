@@ -10,6 +10,14 @@ variable "instances_info" {
 }
 variable "region" {}
 
+# Instances info example:
+# 
+# instances_info = [ {
+#   user = "ec2-user"
+#   ami = "ami-0ea7dc624e77a15d5", # Amazon Linux
+#   args = [ "apache_package=httpd" ]
+# }]
+
 terraform {
   required_providers {
     aws = {
@@ -39,7 +47,7 @@ resource "local_file" "ansible_inventory" {
     # todo add concat here
     cons = [for idx, i in var.instances_info : {
       ip = aws_instance.hello_world[idx].public_ip
-      args = i.args
+      args = concat(i.args, ["ansible_user=${i.user}"])
     }]
   })
 }
@@ -83,42 +91,33 @@ resource "aws_security_group" "hello_world" {
   }
 }
 
-resource "null_resource" "configure_ansible" {
-  #  count = length(var.instances_info)
-  # servers are already in inventory
+resource "null_resource" "check_ssh_connectivity" {
+  count = length (var.instances_info)
   triggers = {
-    # run everytime
     run_everytime = timestamp()
-    inventory_generated = local_file.ansible_inventory.content_sha1
   }
-
   # this shit will ensure that connection can be established
   # before starting ansible. More:
   # https://stackoverflow.com/questions/62403030/terraform-wait-till-the-instance-is-reachable
-  
-  # TODO: make those not shit (ctrl-c ctrl-v)
-  #       and runned in paralel
-  provisioner "remote-exec" {
-
-    connection {
-      host = aws_instance.hello_world[0].public_ip
-      user = var.instances_info[0].user
-      private_key = file(var.ansible_pri_key_path)
-    }
-
-    inline = [ "echo Connection can be established, starting ansible..." ]
-  }
 
   provisioner "remote-exec" {
-
     connection {
-      host = aws_instance.hello_world[1].public_ip
-      user = var.instances_info[1].user
+      host = aws_instance.hello_world[count.index].public_ip
+      user = var.instances_info[count.index].user
       private_key = file(var.ansible_pri_key_path)
     }
-
     inline = [ "echo Connection can be established, starting ansible..." ]
+  } 
+}
+
+resource "null_resource" "configure_ansible" {
+  triggers = {
+    run_everytime = timestamp()
   }
+  depends_on = [
+    null_resource.check_ssh_connectivity,
+    local_file.ansible_inventory
+  ]
 
   provisioner "local-exec" {
     command = <<-EOT
