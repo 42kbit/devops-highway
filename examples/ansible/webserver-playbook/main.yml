@@ -1,5 +1,4 @@
 ---
-
 - name: Apache init
   hosts:
     - apache_webserver # ansible all

@@ -1,0 +1,29 @@
+---
+- name: For Loop test
+  hosts:
+    - all
+  vars:
+    names:
+      - Jane Doe
+      - Jonh Doe
+      - Sponge Bob
+  tasks:
+    - name: Test For Loop
+      ansible.builtin.debug:
+        msg: "Hello, {{ item }}"
+      loop:
+        "{{ names }}" # repeat this play length times, where
+        # item is current item
+
+    - name: Test Until
+      ansible.builtin.shell: echo -n W >> file.txt ; cat file.txt
+      register: myfile
+      retries: 10
+      until: myfile.stdout.find("WWWW") == false
+
+    - name: Test with_fileglob
+      ansible.builtin.debug:
+        msg: "File: {{ item }}"
+      # loop: "{{ lookup('fileglob', '*', wantlist=True) }}"
+      # same thing
+      with_fileglob: "*"
