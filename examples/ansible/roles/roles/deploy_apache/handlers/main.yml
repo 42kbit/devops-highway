@@ -1,0 +1,7 @@
+---
+- name: Reload apache daemon
+  ansible.builtin.service:
+    name: "{{ apache_package }}"
+    state: started
+    enabled: true
+  become: true
