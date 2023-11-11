@@ -1,12 +1,8 @@
 ---
-- name: Install apache package
-  ansible.builtin.package:
-    name: "{{ apache_package }}"
-    state: present
+- name: Install apache
+  ansible.builtin.include_tasks:
+    file: apache.yml
 
-- name: Render template onto webserver
-  ansible.builtin.template:
-    src: index.html.j2
-    dest: /var/www/html/index.html
-    mode: u=r,g=r,o=r
-  notify: Reload apache daemon
+- name: Delegate example
+  ansible.builtin.include_tasks:
+    file: gather.yml

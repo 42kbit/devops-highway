@@ -1,0 +1,14 @@
+- name: Gather localhost
+  ansible.builtin.setup:
+  delegate_to: localhost
+  delegate_facts: true
+  register: localfacts
+  become: false
+
+- name: Log local facts
+  ansible.builtin.debug:
+    msg: >
+      Your operating system is
+      {{ localfacts.ansible_facts.ansible_os_family }}
+
+# msg: Your operating system is {{ hostvars[inventory_hostname].localfacts.ansible_facts.ansible_os_family }}
