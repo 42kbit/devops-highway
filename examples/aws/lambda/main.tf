@@ -58,7 +58,24 @@ data "archive_file" "lambda_code_zipped" {
   type        = "zip"
   source_dir  = "${path.module}/code"
   output_path = "${path.module}/code.zip"
+  depends_on  = [null_resource.run_everytime]
 }
+
+resource "null_resource" "run_everytime" {
+  triggers = {
+    run_everytime = timestamp()
+  }
+}
+
+# Ok so now (14 Nov. 2023) i've encountered the bug that makes
+# this resource be uploaded everytime, see
+# https://github.com/hashicorp/terraform-provider-aws/issues/29085
+# (last_modified changes, forcing terraform to upload),
+# there is also potential diff in hashes, which are only known at runtime,
+# but as long as code does not change, it will get the same hash from
+# zipped archive, and thus wont upload a change.
+
+# so change is forced by bug, not really my problem here (unless im very dumb)
 
 resource "aws_lambda_function" "lambda_function" {
   filename         = "${path.module}/code.zip"
@@ -68,5 +85,23 @@ resource "aws_lambda_function" "lambda_function" {
   handler          = "lambda_handler.lambda_handler"
   runtime          = "python3.8"
 
-  depends_on = [aws_iam_role_policy_attachment.lambda_iam_role_attachment]
+  depends_on = [
+    aws_iam_role_policy_attachment.lambda_iam_role_attachment,
+    data.archive_file.lambda_code_zipped
+  ]
+}
+
+# Now lets define some buckets to work with.
+
+resource "time_static" "now" {}
+
+resource "aws_s3_bucket" "lambda_s3_bucket" {
+  # this wont run every time, because time_static is created once,
+  # and not every run (unlike timestamp()).
+  bucket = "lambda-playgroud-bucket-${time_static.now.unix}"
+
+  force_destroy = true
+  lifecycle {
+    create_before_destroy = true
+  }
 }
