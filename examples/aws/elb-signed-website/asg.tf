@@ -32,7 +32,6 @@ resource "aws_autoscaling_group" "main" {
   # !TODO: set up this for an application load balancer groups
   target_group_arns = [
     aws_alb_target_group.http80.arn,
-    aws_alb_target_group.https443.arn
   ]
 
   lifecycle {

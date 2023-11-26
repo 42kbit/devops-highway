@@ -20,7 +20,6 @@ resource "aws_alb_target_group" "http80" {
   deregistration_delay = 10
 }
 
-# if packet came from port 80 and uses HTTP protocol, forward it to this group.
 resource "aws_alb_listener" "http80" {
   load_balancer_arn = aws_alb.main.arn
   port              = 80
@@ -28,30 +27,15 @@ resource "aws_alb_listener" "http80" {
 
   # throw 301 and redirect to https
 
-  #default_action {
-  #  type = "redirect"
-
-  #  redirect {
-  #    port        = "443"
-  #    protocol    = "HTTPS"
-  #    status_code = "HTTP_301"
-  #  }
-  #}
-
-  # allow http
-
   default_action {
-    type             = "forward"
-    target_group_arn = aws_alb_target_group.http80.arn
-  }
-}
+    type = "redirect"
 
-resource "aws_alb_target_group" "https443" {
-  name                 = "${aws_alb.main.name}-tg-https443"
-  vpc_id               = aws_default_vpc.default.id
-  port                 = 443
-  protocol             = "HTTPS"
-  deregistration_delay = 10
+    redirect {
+      port        = "443"
+      protocol    = "HTTPS"
+      status_code = "HTTP_301"
+    }
+  }
 }
 
 resource "aws_alb_listener" "https443" {
@@ -61,9 +45,10 @@ resource "aws_alb_listener" "https443" {
   ssl_policy        = "ELBSecurityPolicy-2016-08"
   certificate_arn   = data.aws_acm_certificate.main.arn
 
+  # ssl temination, since facing https443, sending to instances http80
   default_action {
     type             = "forward"
-    target_group_arn = aws_alb_target_group.https443.arn
+    target_group_arn = aws_alb_target_group.http80.arn
   }
 }
 
