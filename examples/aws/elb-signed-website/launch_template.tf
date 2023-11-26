@@ -1,5 +1,7 @@
 
 resource "aws_security_group" "https" {
+  vpc_id = aws_default_vpc.default.id
+
   dynamic "ingress" {
     for_each = ["80", "443"]
     content {
@@ -20,7 +22,7 @@ resource "aws_security_group" "https" {
   }
 }
 
-data "aws_ami" "latest_ubuntu" {
+data "aws_ami" "latest_amazon_linux_2" {
   owners      = ["amazon"]
   most_recent = true
   filter {
@@ -33,7 +35,7 @@ variable "template_instance_type" {}
 
 resource "aws_launch_template" "main" {
   name                   = "main_launch_configuration"
-  image_id               = data.aws_ami.latest_ubuntu.id
+  image_id               = data.aws_ami.latest_amazon_linux_2.id
   instance_type          = var.template_instance_type
   vpc_security_group_ids = [aws_security_group.https.id]
 

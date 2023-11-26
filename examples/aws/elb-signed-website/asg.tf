@@ -29,7 +29,11 @@ resource "aws_autoscaling_group" "main" {
   }
 
   vpc_zone_identifier = [for subnet in data.aws_subnet.all_defaults : subnet.id]
-  load_balancers      = [aws_elb.main.name]
+  # !TODO: set up this for an application load balancer groups
+  target_group_arns = [
+    aws_alb_target_group.http80.arn,
+    aws_alb_target_group.https443.arn
+  ]
 
   lifecycle {
     # lower dowitime, by creating new instances
