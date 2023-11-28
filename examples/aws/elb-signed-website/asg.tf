@@ -29,7 +29,6 @@ resource "aws_autoscaling_group" "main" {
   }
 
   vpc_zone_identifier = [for subnet in data.aws_subnet.all_defaults : subnet.id]
-  # !TODO: set up this for an application load balancer groups
   target_group_arns = [
     aws_alb_target_group.http80.arn,
   ]

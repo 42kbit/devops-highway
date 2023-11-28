@@ -3,13 +3,15 @@ Who knows, maybe someday, someone, will find this repo useful :T
 
 CC0 - NO RIGHTS RESERVED
 
-Git
+Expect here following:
+
+Git (come on it hosted using git)
 Terraform
-AWS (with terraform)
+AWS (with terraform and others)
 Ansible
 Jenkins or Github Actions
 Kubernates
 
 Ideas:
-- Ansible project that sets up wireguard vpn on given vpc
-- HTTPS Website, on aws, with load balancers and other goodies
+- Ansible project that sets up wireguard vpn on given vps (ec2 instance)
+- HTTPS Website, on aws, with load balancers and other funnys (done i guess)
