@@ -1,4 +1,8 @@
 
+locals {
+  tg_bucket_name = get_env("TG_BUCKET_NAME", "terragrunt-tfstate-bucket")
+}
+
 remote_state {
   backend = "s3"
   generate = {
@@ -7,16 +11,17 @@ remote_state {
   }
   config = {
     # this will be dry, but name is not generated, which sucks.
-    bucket  = "terragrunt-tfstate-bucket"
+    bucket  = local.tg_bucket_name
     key     = "${path_relative_to_include()}/terraform.tfstate"
     region  = "eu-north-1"
     encrypt = true
+    # can also add dynamodb lock, but its a lab so we dont really care.
   }
   disable_init = false
 }
 
 inputs = {
-  backend_bucket_name = "terragrunt-tfstate-bucket"
+  backend_bucket_name = local.tg_bucket_name
   region = "eu-north-1"
 }
 
