@@ -1,4 +1,6 @@
 
+variable "jenkins_ami" {}
+
 variable "vpc_id" {}
 
 # gotta specify type if importing from terragrunt, since it will send
@@ -16,7 +18,7 @@ resource "aws_security_group" "ssh" {
   vpc_id = var.vpc_id
 
   dynamic "ingress" {
-    for_each = ["22", "8080", "8443"]
+    for_each = ["22", "80", "8080", "8443"]
     content {
       from_port        = ingress.value
       to_port          = ingress.value # open only one port
@@ -35,16 +37,6 @@ resource "aws_security_group" "ssh" {
   }
 }
 
-data "aws_ami" "ubuntu" {
-  most_recent = true
-
-  filter {
-    name   = "name"
-    values = ["ubuntu/images/hvm-ssd/ubuntu-jammy-22.04-amd64-server-*"]
-  }
-  owners = ["099720109477"] # Canonical
-}
-
 variable "ec2_test_instances_info" {
   type = object({
     instance_type       = string,
@@ -59,10 +51,9 @@ resource "aws_key_pair" "key" {
 resource "aws_instance" "test_instance" {
   subnet_id       = var.public_subnet_ids[0]
   instance_type   = var.ec2_test_instances_info.instance_type
-  ami             = data.aws_ami.ubuntu.id
+  ami             = var.jenkins_ami
   security_groups = [aws_security_group.ssh.id]
   key_name        = aws_key_pair.key.key_name
-  user_data       = file("./jenkins_stable_install.sh")
   tags = {
     Name = "Jenkins server"
   }
