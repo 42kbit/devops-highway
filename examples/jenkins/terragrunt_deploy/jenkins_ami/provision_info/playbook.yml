@@ -37,7 +37,13 @@
           - java-17 # java-17-openjdk seems missing idk
           - jenkins
 
-    # jenkins does not work with ansible.builtin.service for some reason
+    # I DONT KNOW WHY THE FUCK, BUT THIS FIXES JENKINS STUPID DAEMON INABILITY TO START
+    - name: Sleep for 30 seconds (waiting for jenkins to spin-up)
+      ansible.builtin.wait_for:
+        timeout: 30
+      delegate_to: localhost
+      become: false
+
     - name: Ensure systemd daemon and jenkins started
       ansible.builtin.systemd_service:
         name: jenkins
