@@ -17,7 +17,7 @@ locals {
   timestamp = regex_replace(timestamp(), "[- TZ:]", "")
 }
 
-source "amazon-ebs" "ubuntu" {
+source "amazon-ebs" "amazon2" {
   #    ^^^^^^^^^^^^ ^^^^^^^^
   #   builder type    name
 
@@ -28,16 +28,21 @@ source "amazon-ebs" "ubuntu" {
   ami_name      = "my-packer-ami-${local.timestamp}"
   instance_type = "t3.micro"
   region        = "eu-north-1"
+
   source_ami_filter {
     filters = {
-      name                = "ubuntu/images/*ubuntu-jammy-22.04-amd64-server-*"
+      name                = "amzn2-ami-hvm*"
       root-device-type    = "ebs"
-      virtualization-type = "hvm"
+      virtualization-type = "hvm"     
     }
+    owners      = ["amazon"]
     most_recent = true
-    owners      = ["099720109477"] # cannonical
   }
-  ssh_username = "ubuntu"
+  
+  tags = {
+    Env = "Prod"
+  }
+  ssh_username = "ec2-user"
 }
 
 # this block defines how to provision sources that we provided.
@@ -46,7 +51,7 @@ source "amazon-ebs" "ubuntu" {
 build {
   # which sources to provision with this block
   sources = [
-    "source.amazon-ebs.ubuntu"
+    "source.amazon-ebs.amazon2"
   ]
    
   provisioner "ansible" {

@@ -1,10 +1,48 @@
 ---
 - name: Provision Image
-  hosts: default
+  hosts: all
   become: true
 
+  # https://middlewaretechnologies.in/2021/04/how-to-install-and-configure-jenkins-using-ansible-playbook.html
+
   tasks:
-    - name: Install Apache
-      ansible.builtin.package:
-        name: apache2
+    # https://pkg.jenkins.io/redhat-stable/
+    # sudo wget -O /etc/yum.repos.d/jenkins.repo \
+    #    https://pkg.jenkins.io/redhat-stable/jenkins.repo
+    # sudo rpm --import https://pkg.jenkins.io/redhat-stable/jenkins.io-2023.key
+    - name: Import jenkins.io repository
+      ansible.builtin.yum_repository:
+        name: jenkins-ci
+        description: Add jenkins-ci package repository
+        baseurl: https://pkg.jenkins.io/redhat-stable
+        gpgkey: https://pkg.jenkins.io/redhat-stable/jenkins.io-2023.key
+        gpgcheck: true
+
+    - name: Ensure gpg key is imported
+      ansible.builtin.rpm_key:
+        key: https://pkg.jenkins.io/redhat-stable/jenkins.io-2023.key
         state: present
+
+    # yum install fontconfig java-17-openjdk
+    # yum install jenkins
+
+    - name: Ensure jenkins, java, fontconfig
+      ansible.builtin.yum:
+        name: "{{ packages }}"
+        state: present
+        update_cache: true
+      vars:
+        packages:
+          - fontconfig
+          - java-17 # java-17-openjdk seems missing idk
+          - jenkins
+
+    # jenkins does not work with ansible.builtin.service for some reason
+    - name: Ensure systemd daemon and jenkins started
+      ansible.builtin.systemd_service:
+        name: jenkins
+        state: started
+        enabled: true
+        daemon_reload: true
+      async: 600
+      poll: 0
