@@ -15,7 +15,7 @@ provider "kubernetes" {
   config_path = var.k8s.config_path
 }
 
-resource "kubernetes_pod" "node_app" {
+resource "kubernetes_pod_v1" "node_app" {
   metadata {
     name = "node-app"
   }
