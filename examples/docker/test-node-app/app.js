@@ -2,9 +2,11 @@
 
 const express = require('express')
 const app = express()
+const os = require('os')
 
 app.get('/', (req, res) => {
-    res.send('Hello World! This is a docker container.')
+    const hostname = os.hostname();
+    res.send(`Hello World! Hostname is: ${hostname}\n`)
 })
 app.listen(3000, () => {
     console.log('Server ready')
