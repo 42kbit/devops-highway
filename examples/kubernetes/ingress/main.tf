@@ -113,9 +113,9 @@ resource "kubernetes_horizontal_pod_autoscaler_v2" "prod_hpa" {
   }
 }
 
-resource "kubernetes_service_v1" "node_app_cip" {
+resource "kubernetes_service_v1" "node_app" {
   metadata {
-    name = "node-app-cip"
+    name = "node-app"
   }
   spec {
     # which pods route traffic to
@@ -132,14 +132,40 @@ resource "kubernetes_service_v1" "node_app_cip" {
     port {
       name = "to-node-app" # should be used when
       # one service has multiple ports it listens to
-      port        = 80    # port used within the cluster (ClusterIP)
-      target_port = 3000  # port, that pods listen to
-      node_port   = 30123 # this allows service to be acessed via
+      port        = 80   # port used within the cluster (ClusterIP)
+      target_port = 3000 # port, that pods listen to
+      # node_port   = 30123 # this allows service to be acessed via
       # each nodes ip. Eg http://192.168.12.123:30123, where
       # 192.168.12.123 is ip of the node (minikube in this case).
       # P.S "node_port" only valid for NodePort
     }
 
-    type = "NodePort"
+    type = "ClusterIP"
   }
 }
+
+resource "kubernetes_ingress_v1" "node_app" {
+  metadata {
+    name = "node-app-ingress"
+  }
+  spec {
+    rule {
+      host = "mydomain-example.com" # you can add it to hosts to resolve
+      http {
+        path {
+          path = "/"
+
+          backend {
+            service {
+              name = kubernetes_service_v1.node_app.metadata[0].name
+              port {
+                number = 80
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
