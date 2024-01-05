@@ -1,0 +1,18 @@
+; zone file for domain.lab
+
+; in zone file, comments start with ";" symbol
+@       IN      SOA ns.domain.lab. zone-admin.domain.lab. (
+                    1        ; Serial
+                    600      ; Refresh
+                    3600     ; Retry
+                    1209600  ; Expire
+                    3600     ; Negative Cache TTL
+)    
+
+;       ttl     type        value
+
+@       86400       IN      NS      ns.domain.lab.
+ns      86400       IN      A       127.0.0.1
+
+www       86400       IN      A       127.0.0.1
+app1      86400       IN      A       127.0.0.1
