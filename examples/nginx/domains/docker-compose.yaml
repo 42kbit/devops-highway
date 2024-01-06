@@ -7,8 +7,8 @@ services:
     ports:
       - 8080:80/tcp
     volumes:
+      - ./nginx/conf:/etc/nginx/:ro
       - ./nginx/html:/usr/share/nginx/html:ro
-      - ./nginx/conf.d:/etc/nginx/conf.d:ro
     restart: always
 
   bind:
