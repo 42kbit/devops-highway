@@ -1,0 +1,10 @@
+name: prometheus-hello-world
+
+services:
+  prometheus-server:
+    build:
+      context: ./prometheus
+    ports:
+      - 9090:9090/tcp
+    volumes:
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
