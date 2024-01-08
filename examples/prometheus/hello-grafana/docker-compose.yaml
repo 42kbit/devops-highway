@@ -28,6 +28,18 @@ services:
         ipv4_address: 10.210.210.3
     restart: unless-stopped
 
+  # this will gather statistics not from a container, but from original host
+  node_exporter:
+    build:
+      context: ./node_exporter
+    command:
+      - "--path.rootfs=/host"
+    network_mode: host
+    pid: host
+    restart: unless-stopped
+    volumes:
+      - "/:/host:ro,rslave"
+
 networks:
   monitoring:
     driver: bridge

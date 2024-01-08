@@ -15,3 +15,10 @@ scrape_configs:
           - demo.promlabs.com:10000
           - demo.promlabs.com:10001
           - demo.promlabs.com:10002
+  # also a statistics from localhost, about system that you are running
+  # (powered by node_exporter)
+  - job_name: localhost_node
+    static_configs:
+      - targets:
+          # ip of a gateway, see docker-compose.yaml
+          - 10.210.210.1:9100
