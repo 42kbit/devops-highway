@@ -1,0 +1,17 @@
+global:
+  scrape_interval: 15s
+
+scrape_configs:
+  # gather statistics for the server itself
+  - job_name: prometheus
+    static_configs:
+      - targets:
+          - localhost:9090
+  # gather statistics for the demo servers, hosted by prometheus
+  # specifically for demo purposes.
+  - job_name: demo_servers
+    static_configs:
+      - targets:
+          - demo.promlabs.com:10000
+          - demo.promlabs.com:10001
+          - demo.promlabs.com:10002
